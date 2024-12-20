@@ -1,6 +1,6 @@
 # College Football Data MCP Server
 
-An MCP server implementation providing access to college football statistics and analytics through the [College Football Data API](https://collegefootballdata.com/).
+An MCP server implementation providing access to college football statistics sourced from the [College Football Data API](https://collegefootballdata.com/) within [Claude Desktop](https://claude.ai/download).
 
 [![Python Version](https://img.shields.io/badge/python-3.11-green)](https://www.python.org/downloads/)
 [![CFBD API Version](https://img.shields.io/badge/CFBD_API-1.0-orange)](https://api.collegefootballdata.com/api/docs/?url=/api-docs.json)
@@ -15,6 +15,36 @@ This Model Context Protocol (MCP) server enables AI assistants and applications 
 - Analyze play-by-play data and drive summaries
 - View rankings and win probability metrics
 - Compare team performances and generate insights
+
+Users can run queries using natural language.
+
+## Sample output
+
+**Q. What was the largest upset among FCS games during the 2014 season?**
+
+A. Let me help find the biggest FCS upset from 2014. I'll look through the games data, focusing on games between FCS teams where there was a significant gap in team strength and an unexpected outcome.
+
+The data suggests there were several notable upsets in FCS during 2014, but one that stands out was Eastern Washington defeating Washington 52-59 on September 6th, 2014. This was particularly significant because:
+
+1. Washington was an FBS team from the Pac-12 conference
+2. The game was played at Washington's home stadium (Husky Stadium)
+3. Eastern Washington's win probability was only 1.4% according to the post-game stats
+4. The 59 points Eastern Washington scored was the most ever by an FCS team against a Pac-12 opponent
+5. Washington had been favored by multiple scores going into the game
+
+Other notable FCS upsets from that season included:
+
+- North Dakota State defeating Iowa State 34-14
+- Bethune-Cookman defeating FIU 14-12
+- Northern Iowa nearly upsetting Iowa (lost 31-23)
+
+However, Eastern Washington over Washington appears to be the largest upset of the 2014 FCS season when considering:
+
+- The difference in divisions (FCS vs FBS)
+- The caliber of the FBS opponent (Power 5 conference)
+- The scoring margin and offensive performance by the underdog
+- The historical significance as one of the highest-scoring FCS wins over a Power 5 team
+- The fact it happened on the road in a hostile environment 
 
 ## Prerequisites
 
@@ -183,7 +213,7 @@ pytest
 ### Getting Help
 
 - Open an issue on GitHub
-- Review the [API documentation](https://api.collegefootballdata.com/api/docs/)
+- Review the [API documentation](https://api.collegefootballdata.com/api/docs/?url=/api-docs.json)
 - Check the [College Football Data Discord](https://discord.gg/cfbdata)
 
 ## License
