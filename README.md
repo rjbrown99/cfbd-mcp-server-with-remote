@@ -2,7 +2,8 @@
 
 An MCP server implementation providing access to college football statistics and analytics through the [College Football Data API](https://collegefootballdata.com/).
 
-[![Python Version](https://img.shields.io/badge/python-3.11-blue)](https://pypi.org/project/cfbd/)
+[![Python Version](https://img.shields.io/badge/python-3.11-blue)](https://www.python.org/downloads/)
+[![CFBD API Version](https://img.shields.io/badge/CFBD_API-1.0-blue)](https://api.collegefootballdata.com/api/docs/?url=/api-docs.json)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ## Overview
@@ -119,7 +120,7 @@ Pre-built analysis templates:
 The College Football Data API is free to use but has rate limiting:
 
 - Free tier: Limited requests per minute
-- [Patreon subscribers](https://www.patreon.com/collegefootballdata) get higher rate limits
+- [CFBD Patreon subscribers](https://www.patreon.com/collegefootballdata) get higher rate limits
 - Use efficient querying patterns to avoid hitting limits
 - Handle rate limit errors gracefully
 
@@ -128,7 +129,7 @@ The College Football Data API is free to use but has rate limiting:
 ### Project Structure
 
 ```
-cfbd/
+cfbd-mcp-server/
 ├── README.md
 ├── pyproject.toml
 └── src/
@@ -182,8 +183,8 @@ pytest
 ### Getting Help
 
 - Open an issue on GitHub
-- Check the [College Football Data Discord](https://discord.gg/cfbdata)
 - Review the [API documentation](https://api.collegefootballdata.com/api/docs/)
+- Check the [College Football Data Discord](https://discord.gg/cfbdata)
 
 ## License
 
@@ -193,4 +194,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - [College Football Data](https://collegefootballdata.com/) for providing the API
 - [Model Context Protocol](https://modelcontextprotocol.io) for the MCP specification
-- All contributors to this project
