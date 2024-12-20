@@ -1,0 +1,17 @@
+{
+    "mcpServers": {
+        "cfbd": {
+            "command": "uv",
+            "args": [
+                "--directory",
+                "/full/path/to/cfbd-mcp-server/src/cfbd",
+                "run",
+                "cfbd"
+            ],
+            "env": {
+                "CFB_API_KEY": "xxx",
+                "PATH": "/full/path/to/python"
+            }
+        }
+    }
+}

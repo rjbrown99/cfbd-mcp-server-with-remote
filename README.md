@@ -2,7 +2,7 @@
 
 An MCP server implementation providing access to college football statistics and analytics through the [College Football Data API](https://collegefootballdata.com/).
 
-[![Python Version](https://img.shields.io/pypi/pyversions/cfbd.svg)](https://pypi.org/project/cfbd/)
+[![Python Version](https://img.shields.io/badge/python-3.11-blue)](https://pypi.org/project/cfbd/)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ## Overview
