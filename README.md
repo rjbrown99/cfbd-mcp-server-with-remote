@@ -197,7 +197,7 @@ pytest
 ### Common Issues
 
 1. **API Key Errors**
-   - Verify your API key is correctly set in `.env`
+   - Verify your API key is correctly set in both the `.env` and `claude_desktop_config.json` files
    - Check the key is valid at collegefootballdata.com
 
 2. **Rate Limiting**
