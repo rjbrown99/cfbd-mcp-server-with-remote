@@ -97,7 +97,16 @@ uv run cfbd
     "mcpServers": {
         "cfbd": {
             "command": "uv",
-            "args": ["--directory", "/absolute/path/to/cfbd", "run", "cfbd"]
+            "args": [
+                "--directory",
+                "/full/path/to/cfbd-mcp-server/src/cfbd",
+                "run",
+                "cfbd"
+            ],
+            "env": {
+                "CFB_API_KEY": "xxx",
+                "PATH": "/full/path/to/python"
+            }
         }
     }
 }
