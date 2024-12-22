@@ -5,7 +5,7 @@ An MCP server implementation providing access to college football statistics sou
 [![Python Version](https://img.shields.io/badge/python-3.11-green)](https://www.python.org/downloads/)
 [![CFBD API Version](https://img.shields.io/badge/CFBD_API-1.0-orange)](https://api.collegefootballdata.com/api/docs/?url=/api-docs.json)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![smithery badge](https://smithery.ai/badge/cfbd)](https://smithery.ai/servers/cfbd)
+[![smithery badge](https://smithery.ai/badge/cfbd)](https://smithery.ai/server/cfbd)
 
 
 ## Overview
@@ -58,7 +58,7 @@ However, Eastern Washington over Washington appears to be the largest upset of t
 
 ### Installing via Smithery
 
-To install College Football Data Server for Claude Desktop automatically via [Smithery](https://smithery.ai/servers/cfbd):
+To install College Football Data Server for Claude Desktop automatically via [Smithery](https://smithery.ai/server/cfbd):
 
 ```bash
 npx -y @smithery/cli install cfbd --client claude
