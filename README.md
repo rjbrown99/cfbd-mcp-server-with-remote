@@ -186,6 +186,8 @@ uv sync --dev --all-extras
 uv run cfbd-mcp-server
 ```
 
+6. Close and restart Claude Desktop
+
 ## Features
 
 ### Resources
