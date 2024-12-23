@@ -3,7 +3,7 @@ import os
 import sys
 from importlib.metadata import metadata
 from dotenv import load_dotenv
-from typing import Any
+from typing import Any, TypedDict, Type, cast, Union
 import httpx
 
 from mcp.server.models import InitializationOptions
@@ -15,11 +15,11 @@ from .schema_helpers import create_tool_schema
 
 from .cfbd_schema import (
     # Request parameter types
-    getGames, getTeamRecords, getGamesTeams, getPlays, getDrives,
-    getPlayStats, getRankings, getMetricsPregameWp, getAdvancedBoxScore,
+    getGames, getTeamRecords, getPlays, getDrives, getPlayStats,
+    getRankings, getMetricsPregameWp, getAdvancedBoxScore,
     
     # Response types
-    GamesResponse, TeamRecordResponse, GamesTeamsResponse, PlaysResponse,
+    GamesResponse, TeamRecordResponse, PlaysResponse,
     DrivesResponse, PlayStatsResponse, RankingsResponse,
     MetricsPregameWpResponse, AdvancedBoxScoreResponse,
     
@@ -64,12 +64,6 @@ async def handle_list_resources() -> list[types.Resource]:
             uri="schema://records",
             name="Team records endpoint schema",
             description="Get team season records",
-            mimeType="text/plain"
-        ),
-        types.Resource(
-            uri="schema://games/teams",
-            name="Games/Teams endpoint",
-            description="Schema for the /games/teams endpoint",
             mimeType="text/plain"
         ),
         types.Resource(
@@ -126,12 +120,6 @@ async def handle_read_resource(uri: str) -> str:
             "parameters": getTeamRecords.__annotations__,
             "response": TeamRecordResponse.__annotations__,
             "description": "Get team records for specified parameters"
-        },
-        "schema://games/teams": {
-            "endpoint": "/games/teams",
-            "parameters": getGamesTeams.__annotations__,
-            "response": GamesTeamsResponse.__annotations__,
-            "description": "Get game & team records for specified parameters"
         },
         "schema://plays": {
             "endpoint": "/plays",
@@ -205,6 +193,59 @@ def _format_annotations(annotations: dict) -> str:
             type_str = str(type_hint)
         formatted.append(f"- {name}: {type_str}")
     return "\n".join(formatted)
+
+def validate_params(params: dict, schema_class: Type[TypedDict]) -> dict:
+    """Validate parameters against a TypedDict schema."""
+    try:
+        # Get the annotations from the schema class
+        expected_types = schema_class.__annotations__
+        validated_params = {}
+
+        # Validate each parameter
+        for key, value in params.items():
+            if key not in expected_types:
+                raise ValueError(f"Unexpected parameter: {key}")
+
+            expected_type = expected_types[key]
+
+            # Special handling for classification parameter
+            if key == "classification" and value is not None:
+                value = value.lower()
+                if value not in VALID_DIVISIONS:
+                    raise ValueError(f"Invalid Classification: Must be one of: {', '.join(VALID_DIVISIONS)}")
+
+            # Handle Optional types
+            if hasattr(expected_type, "__origin__") and expected_type.__origin__ is Union:
+                if type(None) in expected_type.__args__:
+                    # Parameter is optional
+                    if value is not None:
+                        # Validate against the non-None type
+                        non_none_type = next(t for t in expected_type.__args__ if t != type(None))
+                        # Handle primitive types
+                        if non_none_type in (str, int, float, bool):
+                            if not isinstance(value, non_none_type):
+                                raise ValueError(f"Parameter {key} must be of type {non_none_type.__name__}")
+                        validated_params[key] = value
+                    else:
+                        validated_params[key] = None
+            else:
+                # Parameter is required
+                if not isinstance(value, expected_type):
+                    raise ValueError(f"Parameter {key} must be of type {expected_type.__name__}")
+                validated_params[key] = value
+
+        # Check for required parameters
+        for param, param_type in expected_types.items():
+            is_optional = (hasattr(param_type, "__origin__") and 
+                         param_type.__origin__ is Union and 
+                         type(None) in param_type.__args__)
+            if not is_optional and param not in params:
+                raise ValueError(f"Missing required parameter: {param}")
+
+        return validated_params
+    
+    except Exception as e:
+        raise ValueError(f"Parameter validation failed: {str(e)}")
 
 @server.list_prompts()
 async def handle_list_prompts() -> list[types.Prompt]:
@@ -356,11 +397,6 @@ async def handle_list_tools() -> list[types.Tool]:
             inputSchema=create_tool_schema(getTeamRecords)
         ),
         types.Tool(
-            name="get-games-teams",
-            description="Get college football team game data.",
-            inputSchema=create_tool_schema(getGamesTeams)
-        ),
-        types.Tool(
             name="get-plays",
             description="Get college football play-by-play data.",
             inputSchema=create_tool_schema(getPlays)
@@ -400,11 +436,34 @@ async def handle_call_tool(
     """Handle tool execution requests."""
     if not arguments:
         raise ValueError("Arguments are required")
-    
+
+    # Map tool names to their parameter schemas
+    schema_map = {
+        "get-games": getGames,
+        "get-records": getTeamRecords,
+        "get-plays": getPlays,
+        "get-drives": getDrives,
+        "get-play-stats": getPlayStats,
+        "get-rankings": getRankings,
+        "get-pregame-win-probability": getMetricsPregameWp,
+        "get-advanced-box-score": getAdvancedBoxScore
+    }
+
+    if name not in schema_map:
+        raise ValueError(f"Unknown tool: {name}")
+
+    # Validate parameters against schema
+    try:
+        validated_params = validate_params(arguments, schema_map[name])
+    except ValueError as e:
+        return [types.TextContent(
+            type="text",
+            text=f"Validation error: {str(e)}"
+        )]
+
     endpoint_map = {
         "get-games": "/games",
         "get-records": "/records",
-        "get-games-teams": "/games/teams",
         "get-plays": "/plays",
         "get-drives": "/drives",
         "get-play-stats": "/play/stats",
@@ -412,10 +471,7 @@ async def handle_call_tool(
         "get-pregame-win-probability": "/metrics/wp/pregame",
         "get-advanced-box-score": "/game/box/advanced"
     }
-    
-    if name not in endpoint_map:
-        raise ValueError(f"Unkown tool: {name}")
-    
+        
     async with await get_api_client() as client:
         try:
             response = await client.get(endpoint_map[name], params=arguments)
