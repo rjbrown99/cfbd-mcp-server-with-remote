@@ -116,7 +116,7 @@ CFB_API_KEY=your_api_key_here
 
 Start the server:
 ```bash
-uv run cfbd
+uv run cfbd-mcp-server
 ```
 
 ### Connecting with Claude Desktop
@@ -147,6 +147,44 @@ uv run cfbd
 ```
 
 3. Restart Claude Desktop
+
+## Updating after install
+
+1. Download the updated files
+```
+cd cfbd-mcp-server
+git pull
+```
+
+2. Uninstall the existing package:
+```
+uv pip uninstall cfbd-mcp-server
+'''
+
+3. Delete existing build artifacts and metadata
+
+**For Windows:**
+```
+rmdir /s /q build dist
+del /s /q *.egg-info
+```
+
+**For macOS:**
+```
+rm -rf build dist *.egg-info
+```
+
+
+4. Install the revised package and its dependencies
+```
+uv pip install -e .
+uv sync --dev --all-extras
+```
+
+5.
+```
+uv run cfbd-mcp-server
+```
 
 ## Features
 
