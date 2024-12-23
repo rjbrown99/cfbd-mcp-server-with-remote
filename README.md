@@ -146,7 +146,11 @@ uv run cfbd-mcp-server
 }
 ```
 
-3. Restart Claude Desktop
+3. Close then restart Claude Desktop
+
+Once you restart you should see a small hammer icon in the lower right corner of the textbox. If you hover over the icon you'll see the number of MCP tools available.
+
+[!Screenshot of successful install](images/Claude_Desktop_succesful_install.png)
 
 ## Updating after install
 
