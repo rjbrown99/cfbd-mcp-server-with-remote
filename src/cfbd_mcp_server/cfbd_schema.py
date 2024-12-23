@@ -223,6 +223,19 @@ class TeamRecordResponse(TypedDict): # /records repsonse
     homeGames: GameRecord
     awayGames: GameRecord
 
+class getGamesTeams(TypedDict): # /games/teams endpoint
+    year: int
+    week: Optional[int]
+    season_type: Optional[str]
+    team: Optional[str]
+    conference: Optional[str]
+    game_id: Optional[int]
+    classification: Optional[str]
+
+class GamesTeamsResponse(TypedDict): # /games/teams response
+    id: int
+    teams: List[Team]
+
 class getPlays(TypedDict): # /plays endpoint
     year: int
     week: int
@@ -364,6 +377,7 @@ class MetricsPregameWpResponse(TypedDict): # /metrics/wp/pregame response
 # Since the API returns a list of win probabilities
 GamesResponseList = List[GamesResponse]
 TeamRecordResponseList = List[TeamRecordResponse]
+GamesTeamsResponseList = List[GamesTeamsResponse]
 PlaysResponseList = List[PlaysResponse]
 DrivesResponseList = List[DrivesResponse]
 PlayStatsResponseList = List[PlayStatsResponse]

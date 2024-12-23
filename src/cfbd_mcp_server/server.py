@@ -15,11 +15,11 @@ from .schema_helpers import create_tool_schema
 
 from .cfbd_schema import (
     # Request parameter types
-    getGames, getTeamRecords, getPlays, getDrives, getPlayStats,
-    getRankings, getMetricsPregameWp, getAdvancedBoxScore,
+    getGames, getTeamRecords, getGamesTeams, getPlays, getDrives,
+    getPlayStats, getRankings, getMetricsPregameWp, getAdvancedBoxScore,
     
     # Response types
-    GamesResponse, TeamRecordResponse, PlaysResponse,
+    GamesResponse, TeamRecordResponse, GamesTeamsResponse, PlaysResponse,
     DrivesResponse, PlayStatsResponse, RankingsResponse,
     MetricsPregameWpResponse, AdvancedBoxScoreResponse,
     
@@ -411,6 +411,17 @@ async def handle_list_tools() -> list[types.Tool]:
             inputSchema=create_tool_schema(getTeamRecords)
         ),
         types.Tool(
+            name="get-games-teams",
+            description="""Get college football team game data.
+            Required: year plus at least one of: week, team or conference.
+            Example valid queries:
+            - year=2023, team="Alabama"
+            - year=2023, week=1
+            - year=2023, conference="SEC
+            """,
+            inputSchema=create_tool_schema(getGamesTeams)
+        ),
+        types.Tool(
             name="get-plays",
             description="""Get college football play-by-play data.
             Required: year AND week
@@ -494,6 +505,7 @@ async def handle_call_tool(
     schema_map = {
         "get-games": getGames,
         "get-records": getTeamRecords,
+        "get-games-teams": getGamesTeams,
         "get-plays": getPlays,
         "get-drives": getDrives,
         "get-play-stats": getPlayStats,
@@ -517,6 +529,7 @@ async def handle_call_tool(
     endpoint_map = {
         "get-games": "/games",
         "get-records": "/records",
+        "get-games-teams": "/games/teams",
         "get-plays": "/plays",
         "get-drives": "/drives",
         "get-play-stats": "/play/stats",
