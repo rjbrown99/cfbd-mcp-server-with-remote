@@ -159,7 +159,7 @@ git pull
 2. Uninstall the existing package:
 ```
 uv pip uninstall cfbd-mcp-server
-'''
+```
 
 3. Delete existing build artifacts and metadata
 
