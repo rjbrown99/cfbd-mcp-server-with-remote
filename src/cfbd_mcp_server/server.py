@@ -587,7 +587,11 @@ async def main() -> None:
         server_name = "cfbd-mcp-server"
         server_version = "0.1.0"
     
+    # Add this line for startup confirmation
+    print("CFB Data MCP Server starting...", file=sys.stderr)
+    
     async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):
+        print("Server initialized and ready for connections", file=sys.stderr)
         await server.run(
             read_stream,
             write_stream,
