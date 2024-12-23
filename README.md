@@ -105,13 +105,13 @@ uv run cfbd
 ```json
 {
     "mcpServers": {
-        "cfbd": {
+        "cfbd-mcp-server": {
             "command": "uv",
             "args": [
                 "--directory",
-                "/full/path/to/cfbd-mcp-server/src/cfbd",
+                "/full/path/to/cfbd-mcp-server",
                 "run",
-                "cfbd"
+                "cfbd-mcp-server"
             ],
             "env": {
                 "CFB_API_KEY": "xxx",
@@ -182,7 +182,7 @@ cfbd-mcp-server/
 ├── README.md
 ├── pyproject.toml
 └── src/
-    └── cfbd/
+    └── cfbd_mcp_server/
         ├── .env
         ├── __init__.py
         ├── cfbd_schema.py
