@@ -578,13 +578,13 @@ async def main() -> None:
     """Run the server."""
     try:
         # Get metadata from project.toml
-        pkg_metadata = metadata("cfb-server")
+        pkg_metadata = metadata("cfbd-mcp-server")
         server_name = pkg_metadata["Name"]
         server_version = pkg_metadata["Version"]
     except Exception as e:
         # Fallback values in case metadata can't be read
         print(f"Warning: Could not read package metadata: {e}", file=sys.stderr)
-        server_name = "cfb-server"
+        server_name = "cfbd-mcp-server"
         server_version = "0.1.0"
     
     async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):
