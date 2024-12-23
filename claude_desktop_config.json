@@ -1,12 +1,12 @@
 {
     "mcpServers": {
-        "cfbd": {
+        "cfbd-mcp-server": {
             "command": "uv",
             "args": [
                 "--directory",
-                "/full/path/to/cfbd-mcp-server/src/cfbd",
+                "/full/path/to/cfbd-mcp-server",
                 "run",
-                "cfbd"
+                "cfbd-mcp-server"
             ],
             "env": {
                 "CFB_API_KEY": "xxx",

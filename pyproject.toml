@@ -1,5 +1,5 @@
 [project]
-name = "cfbd"
+name = "cfbd-mcp-server"
 version = "0.1.0"
 description = "Interact with the College Football Data API via the Claude Desktop."
 readme = "README.md"
@@ -16,4 +16,4 @@ requires = [ "hatchling",]
 build-backend = "hatchling.build"
 
 [project.scripts]
-cfbd = "cfbd:main"
+cfbd-mcp-server = "cfbd_mcp_server:main"
