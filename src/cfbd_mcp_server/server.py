@@ -589,7 +589,7 @@ async def main() -> None:
         # Fallback values in case metadata can't be read
         print(f"Warning: Could not read package metadata: {e}", file=sys.stderr)
         server_name = "cfbd-mcp-server"
-        server_version = "0.1.0"
+        server_version = "0.4.0"
     
     # Add this line for startup confirmation
     print("CFB Data MCP Server starting...", file=sys.stderr)
