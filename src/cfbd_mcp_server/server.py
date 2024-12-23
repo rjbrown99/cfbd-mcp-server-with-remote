@@ -388,42 +388,95 @@ async def handle_list_tools() -> list[types.Tool]:
     return [
         types.Tool(
             name="get-games",
-            description="Get college football game data.",
+            description="""Get college football game data.
+            Required: year
+            Optional: week, season_type, team, conference, category, game_id
+            Example valid queries:
+            - year=2023
+            - year=2023, team="Alabama"
+            - year=2023, week=1, conference="SEC"
+            """,
             inputSchema=create_tool_schema(getGames)
         ),
         types.Tool(
             name="get-records",
-            description="Get college football team record data.",
+            description="""Get college football team record data.
+            Optional: year, team, conference
+            Example valid queries:
+            - year=2023
+            - team="Alabama"
+            - conference="SEC"
+            - year=2023, team="Alabama"
+            """,
             inputSchema=create_tool_schema(getTeamRecords)
         ),
         types.Tool(
             name="get-plays",
-            description="Get college football play-by-play data.",
+            description="""Get college football play-by-play data.
+            Required: year AND week
+            Optional: season_type, team, offense, defense, conference, offense_conference, defense_conference, play_type, classification
+            Example valid queries:
+            - year=2023, week=1
+            - year=2023, week=1, team="Alabama"
+            - year=2023, week=1, offense="Alabama", defense="Auburn"
+            """,
             inputSchema=create_tool_schema(getPlays)
         ),
         types.Tool(
             name="get-drives",
-            description="Get college football drive data.",
+            description="""Get college football drive data.
+            Required: year
+            Optional: season_type, week, team, offense, defense, conference, offense_conference, defense_conference, classification
+            Example valid queries:
+            - year=2023
+            - year=2023, team="Alabama"
+            - year=2023, offense="Alabama", defense="Auburn"
+            """,
             inputSchema=create_tool_schema(getDrives)
         ),
         types.Tool(
             name="get-play-stats",
-            description="Get college football play statistic data.",
+            description="""Get college football play statistic data.
+            Optional: year, week, team, game_id, athlete_id, stat_type_id, season_type, conference
+            At least one parameter is required
+            Example valid queries:
+            - year=2023
+            - game_id=401403910
+            - team="Alabama", year=2023
+            """,
             inputSchema=create_tool_schema(getPlayStats)
         ),
         types.Tool(
             name="get-rankings",
-            description="Get college football rankings data.",
+            description="""Get college football rankings data.
+            Required: year
+            Optional: week, season_type
+            Example valid queries:
+            - year=2023
+            - year=2023, week=1
+            - year=2023, season_type="regular"
+            """,
             inputSchema=create_tool_schema(getRankings)
         ),
         types.Tool(
             name="get-pregame-win-probability",
-            description="Get college football pregame win probability data.",
+            description="""Get college football pregame win probability data.
+            Optional: year, week, team, season_type
+            At least one parameter is required
+            Example valid queries:
+            - year=2023
+            - team="Alabama"
+            - year=2023, week=1
+            """,
             inputSchema=create_tool_schema(getMetricsPregameWp)
         ),
         types.Tool(
             name="get-advanced-box-score",
-            description="Get advanced box scored data for college football games.",
+            description="""Get advanced box score data for college football games.
+            Required: gameId
+            Example valid queries:
+            - gameId=401403910
+            """,
             inputSchema=create_tool_schema(getAdvancedBoxScore)
         )
     ]
