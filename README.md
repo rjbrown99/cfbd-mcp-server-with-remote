@@ -86,6 +86,30 @@ uv pip install -e .
 CFB_API_KEY=your_api_key_here
 ```
 
+### Manual Installation
+
+1. Clone this repository:
+```bash
+git clone https://github.com/yourusername/cfbd-mcp-server
+cd cfbd-mcp-server
+```
+
+2. Create and activate a virtual environment:
+```bash
+uv venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+```
+
+3. Install dependencies:
+```bash
+uv pip install -e .
+```
+
+4. Create a `.env` file in the project root and add your API key:
+```bash
+CFB_API_KEY=your_api_key_here
+```
+
 ## Usage
 
 ### Running the Server
