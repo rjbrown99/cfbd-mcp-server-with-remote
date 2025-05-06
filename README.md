@@ -3,7 +3,7 @@
 An MCP server implementation providing access to college football statistics sourced from the [College Football Data API](https://collegefootballdata.com/) within [Claude Desktop](https://claude.ai/download).
 
 [![Python Version](https://img.shields.io/badge/python-3.11-green)](https://www.python.org/downloads/)
-[![CFBD API Version](https://img.shields.io/badge/CFBD_API-1.0-orange)](https://api.collegefootballdata.com/api/docs/?url=/api-docs.json)
+[![CFBD API Version](https://img.shields.io/badge/CFBD_API-2.0-orange)](https://apinext.collegefootballdata.com/s)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![smithery badge](https://smithery.ai/badge/cfbd)](https://smithery.ai/server/cfbd)
 
@@ -148,9 +148,9 @@ uv run cfbd-mcp-server
 
 3. Close then restart Claude Desktop
 
-Once you restart you should see a small hammer icon in the lower right corner of the textbox. If you hover over the icon you'll see the number of MCP tools available.
+Once you restart you can confirm the installation by clicking on the plus sign in the lower left corner of the text box. If successful you'll see "Add from cfbd-mcp-server" as one of the menu options. Here's an example screenshot.
 
-![Screenshot of successful install](images/Claude_Desktop_succesful_install.png)
+![Screenshot of successful install](images/cfbd-mcp-server_in_Claude_Desktop.png)
 
 ## Updating after install
 
@@ -300,7 +300,7 @@ pytest
 ### Getting Help
 
 - Open an issue on GitHub
-- Review the [API documentation](https://api.collegefootballdata.com/api/docs/?url=/api-docs.json)
+- Review the [API documentation](https://apinext.collegefootballdata.com/)
 - Check the [College Football Data Discord](https://discord.gg/cfbdata)
 
 ## License

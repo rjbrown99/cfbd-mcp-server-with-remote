@@ -33,7 +33,7 @@ load_dotenv()
 # Initialize server and API configuration
 server = Server("cfbd")
 API_KEY = os.getenv("CFB_API_KEY")
-API_BASE_URL = 'https://api.collegefootballdata.com/'
+API_BASE_URL = 'https://apinext.collegefootballdata.com/'
 
 if not API_KEY:
     raise ValueError("CFB_API_KEY must be set in .env file")
