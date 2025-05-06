@@ -1,6 +1,6 @@
 # College Football Data MCP Server
 
-An MCP server implementation providing access to college football statistics sourced from the [College Football Data API](https://collegefootballdata.com/) within [Claude Desktop](https://claude.ai/download).
+An MCP server implementation providing access to college football statistics sourced from the [College Football Data API V2](https://collegefootballdata.com/) within [Claude Desktop](https://claude.ai/download).
 
 [![Python Version](https://img.shields.io/badge/python-3.11-green)](https://www.python.org/downloads/)
 [![CFBD API Version](https://img.shields.io/badge/CFBD_API-2.0-orange)](https://apinext.collegefootballdata.com/s)
