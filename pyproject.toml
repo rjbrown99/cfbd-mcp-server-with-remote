@@ -1,19 +1,32 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "cfbd-mcp-server"
 version = "0.5.0"
-description = "Interact with the College Football Data API via the Claude Desktop."
+description = "Interact with the College Football Data API via Claude Desktop or Web/API."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
- "mcp>=1.1.2",
- "python-dotenv>=1.0.1",
+    "mcp[cli]",
+    "python-dotenv>=1.0.1",
+    "fastapi",
+    "uvicorn",
+    "pydantic",
+    "starlette"
 ]
+
 [[project.authors]]
 name = "Chris Leonard"
 
-[build-system]
-requires = [ "hatchling",]
-build-backend = "hatchling.build"
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "httpx",
+    "black",
+    "isort"
+]
 
 [project.scripts]
 cfbd-mcp-server = "cfbd_mcp_server:main"
