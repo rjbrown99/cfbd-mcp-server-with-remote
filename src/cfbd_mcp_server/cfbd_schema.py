@@ -37,6 +37,24 @@ class Team(TypedDict):
     points: Optional[int]  # Optional since game might not be completed
     stats: List[TeamStat]
 
+class RosterPlayer(TypedDict):
+    id: str
+    firstName: str
+    lastName: str
+    team: str
+    height: Optional[int] # nullable in API
+    weight: Optional[int]  # nullable in API
+    jersey: Optional[int]  # nullable in API
+    year: int
+    position: Optional[str]  # nullable in API
+    homeCity: Optional[str]  # nullable in API
+    homeState: Optional[str]  # nullable in API
+    homeCountry: Optional[str]  # nullable in API
+    homeLatitude: Optional[float]  # nullable in API
+    homeLongitude: Optional[float]  # nullable in API
+    homeCountyFIPS: Optional[str]  # nullable in API
+    recruitIds: Optional[str]  # nullable in API
+
 class QuarterBreakdown(TypedDict):
     """Breakdown of statistics by quarter and total"""
     total: float
@@ -358,6 +376,28 @@ class RankingsResponse(TypedDict): # /rankings response
     week: int
     polls: List[Poll]
 
+class getRoster(TypedDict): # /roster endpoint
+    team: str
+    year: Optional[int]
+
+class RosterResponse(TypedDict): # /roster response
+    id: str
+    firstName: str
+    lastName: str
+    team: str
+    height: Optional[int]
+    weight: Optional[int]
+    jersey: Optional[int]
+    year: int
+    position: Optional[str]
+    homeCity: Optional[str]
+    homeState: Optional[str]
+    homeCountry: Optional[str]
+    homeLatitude: Optional[float]
+    homeLongitude: Optional[float]
+    homeCountyFIPS: Optional[str]
+    recruitIds: Optional[List[str]]
+
 class getMetricsPregameWp(TypedDict): # /metrics/wp/pregame endpoint
     year: Optional[int]
     week: Optional[int]
@@ -382,6 +422,7 @@ PlaysResponseList = List[PlaysResponse]
 DrivesResponseList = List[DrivesResponse]
 PlayStatsResponseList = List[PlayStatsResponse]
 RankingsResponseList = List[RankingsResponse]
+RosterPlayerList = List[RosterPlayer]
 MetricsPregameWpResponseList = List[MetricsPregameWpResponse]
 
 

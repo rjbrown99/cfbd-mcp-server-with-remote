@@ -16,12 +16,12 @@ from .schema_helpers import create_tool_schema
 from .cfbd_schema import (
     # Request parameter types
     getGames, getTeamRecords, getGamesTeams, getPlays, getDrives,
-    getPlayStats, getRankings, getMetricsPregameWp, getAdvancedBoxScore,
+    getPlayStats, getRankings, getMetricsPregameWp, getAdvancedBoxScore, getRoster,
     
     # Response types
     GamesResponse, TeamRecordResponse, GamesTeamsResponse, PlaysResponse,
     DrivesResponse, PlayStatsResponse, RankingsResponse,
-    MetricsPregameWpResponse, AdvancedBoxScoreResponse,
+    MetricsPregameWpResponse, AdvancedBoxScoreResponse, RosterPlayer,
     
     # Constants
     VALID_SEASONS, VALID_WEEKS, VALID_SEASON_TYPES, VALID_DIVISIONS
@@ -91,6 +91,12 @@ async def handle_list_resources() -> list[types.Resource]:
             mimeType="text/plain"
         ),
         types.Resource(
+            uri="schema://roster",
+            name="Roster endpoint",
+            description="Schema for the /roster endpoint",
+            mimeType="text/plain"
+        ),
+        types.Resource(
             uri="schema://metrics/wp/pregame",
             name="Metrics/wp/pregame endpoint",
             description="Schema for the pregame win probability endpoint",
@@ -144,6 +150,12 @@ async def handle_read_resource(uri: str) -> str:
             "parameters": getRankings.__annotations__,
             "response": RankingsResponse.__annotations__,
             "description": "Get rankings records for specified parameters"
+        },
+        "schema://roster": {
+            "endpoint": "/roster",
+            "parameters": getRoster.__annotations__,
+            "response": RosterPlayer.__annotations__,
+            "description": "Get team roster information for specified parameters"
         },
         "schema://metrics/wp/pregame": {
             "endpoint": "/metrics/wp/pregame",
@@ -474,6 +486,17 @@ async def handle_list_tools() -> list[types.Tool]:
             inputSchema=create_tool_schema(getRankings)
         ),
         types.Tool(
+            name="get-roster",
+            description=base_description + """Get college football roster data and player names and numbers.
+            Required: team
+            Optional: year
+            Example valid queries:
+            - team="Alabama"
+            - team="Alabama", year=2023
+            """,
+            inputSchema=create_tool_schema(getRoster)
+        ),
+        types.Tool(
             name="get-pregame-win-probability",
             description=base_description + """Get college football pregame win probability data.
             Optional: year, week, team, season_type
@@ -514,6 +537,7 @@ async def handle_call_tool(
         "get-drives": getDrives,
         "get-play-stats": getPlayStats,
         "get-rankings": getRankings,
+        "get-roster": getRoster,
         "get-pregame-win-probability": getMetricsPregameWp,
         "get-advanced-box-score": getAdvancedBoxScore
     }
@@ -538,6 +562,7 @@ async def handle_call_tool(
         "get-drives": "/drives",
         "get-play-stats": "/play/stats",
         "get-rankings": "/rankings",
+        "get-roster": "/roster",
         "get-pregame-win-probability": "/metrics/wp/pregame",
         "get-advanced-box-score": "/game/box/advanced"
     }
