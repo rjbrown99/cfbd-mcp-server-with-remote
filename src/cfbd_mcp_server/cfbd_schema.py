@@ -426,7 +426,7 @@ RosterPlayerList = List[RosterPlayer]
 MetricsPregameWpResponseList = List[MetricsPregameWpResponse]
 
 
-VALID_SEASONS = range(2001, 2024)
+VALID_SEASONS = range(2001, 2025)
 VALID_WEEKS = range(1, 16)
 VALID_SEASON_TYPES = ['regular', 'postseason']
 VALID_DIVISIONS = ['fbs', 'fcs', 'ii', 'iii']
