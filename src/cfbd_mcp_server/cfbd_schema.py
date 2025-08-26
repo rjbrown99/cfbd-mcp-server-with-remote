@@ -1,7 +1,20 @@
 # College Football Data API
 # api.collegefootballdata.com
 
-from typing import TypedDict, Optional, List, Union
+from typing import TypedDict, Optional, List, Literal
+
+# --- Enums as Literals (strict string enums) ---
+SeasonType = Literal[
+    "regular",
+    "postseason",
+    "both",
+    "allstar",
+    "spring_regular",
+    "spring_postseason",
+]
+
+
+Classification = Literal["fbs", "fcs", "ii", "iii"]
 
 # custom classes
 class GameClock(TypedDict):
@@ -43,7 +56,7 @@ class RosterPlayer(TypedDict):
     firstName: str
     lastName: str
     team: str
-    height: Optional[int] # nullable in API
+    height: Optional[float] # nullable in API
     weight: Optional[int]  # nullable in API
     jersey: Optional[int]  # nullable in API
     year: Optional[int] # deprecated in API
@@ -54,7 +67,7 @@ class RosterPlayer(TypedDict):
     homeLatitude: Optional[float]  # nullable in API
     homeLongitude: Optional[float]  # nullable in API
     homeCountyFIPS: Optional[str]  # nullable in API
-    recruitIds: Optional[str]  # nullable in API
+    recruitIds: Optional[List[str]]  # nullable in API
 
 class CoachSeason(TypedDict):
     school: str
@@ -67,6 +80,7 @@ class CoachSeason(TypedDict):
     postseasonRank: Optional[int]
     srs: Optional[float]
     spOverall: Optional[float]
+    spOffense: Optional[float]
     spDefense: Optional[float]
 
 class Coach(TypedDict):
@@ -75,6 +89,32 @@ class Coach(TypedDict):
     lastName: str
     hireDate: Optional[str]
     seasons: List[CoachSeason]
+
+class GameLine(TypedDict):
+    provider: str
+    spread: Optional[float]
+    formattedSpread: Optional[str]
+    spreadOpen: Optional[float]
+    overUnder: Optional[float]
+    overUnderOpen: Optional[float]
+    homeMoneyline: Optional[float]
+    awayMoneyline: Optional[float]
+
+class BettingGame(TypedDict):
+    id: int
+    season: int
+    seasonType: SeasonType            # strict enum string
+    week: int
+    startDate: str                    # ISO 8601 date-time string, per your schema style
+    homeTeam: str
+    homeConference: Optional[str]     # nullable: true
+    homeClassification: Optional[Classification]   # nullable: true; enum
+    homeScore: Optional[int]          # nullable: true
+    awayTeam: str
+    awayConference: Optional[str]     # nullable: true
+    awayClassification: Optional[Classification]   # nullable: true; enum
+    awayScore: Optional[int]          # nullable: true
+    lines: List[GameLine]
 
 class QuarterBreakdown(TypedDict):
     """Breakdown of statistics by quarter and total"""
@@ -197,7 +237,7 @@ class PlayerStats(TypedDict):
 class getGames(TypedDict): # /games endpoint
     year: int
     week: Optional[int]
-    season_type: Optional[str]
+    season_type: Optional[SeasonType]
     team: Optional[str]
     conference: Optional[str]
     category: Optional[str]
@@ -207,7 +247,7 @@ class GamesResponse(TypedDict): # /games response
     id: int
     season: int
     week: int
-    season_type: str
+    season_type: SeasonType
     start_date: str
     start_time_tbd: bool
     completed: bool
@@ -265,11 +305,11 @@ class TeamRecordResponse(TypedDict): # /records repsonse
 class getGamesTeams(TypedDict): # /games/teams endpoint
     year: int
     week: Optional[int]
-    season_type: Optional[str]
+    season_type: Optional[SeasonType]
     team: Optional[str]
     conference: Optional[str]
     game_id: Optional[int]
-    classification: Optional[str]
+    classification: Optional[Classification]
 
 class GamesTeamsResponse(TypedDict): # /games/teams response
     id: int
@@ -278,7 +318,7 @@ class GamesTeamsResponse(TypedDict): # /games/teams response
 class getPlays(TypedDict): # /plays endpoint
     year: int
     week: int
-    season_type: Optional[str]
+    season_type: Optional[SeasonType]
     team: Optional[str]
     offense: Optional[str]
     defense: Optional[str]
@@ -286,7 +326,7 @@ class getPlays(TypedDict): # /plays endpoint
     offense_conference: Optional[str]
     defense_conference: Optional[str]
     play_type: Optional[int]
-    classification: Optional[str]
+    classification: Optional[Classification]
 
 class PlaysResponse(TypedDict): # /plays response
     id: int
@@ -319,7 +359,7 @@ class PlaysResponse(TypedDict): # /plays response
 
 class getDrives(TypedDict): # /drives endpoint
     year: int
-    season_type: Optional[str]
+    season_type: Optional[SeasonType]
     week: Optional[int]
     team: Optional[str]
     offense: Optional[str]
@@ -327,7 +367,7 @@ class getDrives(TypedDict): # /drives endpoint
     conference: Optional[str]
     offense_conference: Optional[str]
     defense_conference: Optional[str]
-    classification: Optional[str]
+    classification: Optional[Classification]
 
 class DrivesResponse(TypedDict): # /drives response
     offense: str
@@ -362,7 +402,7 @@ class getPlayStats(TypedDict): # /play/stats endpoint
     game_id: Optional[int]
     athlete_id: Optional[int]
     stat_type_id: Optional[int]
-    season_type: Optional[str]
+    season_type: Optional[SeasonType]
     conference: Optional[str]
 
 class PlayStatsResponse(TypedDict): # /play/stats response
@@ -389,11 +429,11 @@ class PlayStatsResponse(TypedDict): # /play/stats response
 class getRankings(TypedDict): # /rankings endpoint
     year: int
     week: Optional[int]
-    season_type: Optional[str]
+    season_type: Optional[SeasonType]
 
 class RankingsResponse(TypedDict): # /rankings response
     season: int
-    seasonType: str
+    seasonType: SeasonType
     week: int
     polls: List[Poll]
 
@@ -430,18 +470,31 @@ class getCoaches(TypedDict): # /coaches endpoint
 class CoachesResponse(TypedDict): # /coaches response
     firstName: str
     lastName: str
-    hireDate: str
+    hireDate: Optional[str]
     seasons: List[CoachSeason]
+
+class getLines(TypedDict):  # /lines endpoint
+    gameId: Optional[int]              # if not provided, year is required
+    year: Optional[int]
+    seasonType: Optional[SeasonType]   # Literal[...] you defined
+    week: Optional[int]
+    team: Optional[str]
+    home: Optional[str]
+    away: Optional[str]
+    conference: Optional[str]
+    provider: Optional[str]
+
+# The response for the /lines endpoint is a list of BettingGame objects
 
 class getMetricsPregameWp(TypedDict): # /metrics/wp/pregame endpoint
     year: Optional[int]
     week: Optional[int]
     team: Optional[str]
-    season_type: Optional[str]
+    season_type: Optional[SeasonType]
 
 class MetricsPregameWpResponse(TypedDict): # /metrics/wp/pregame response
     season: int
-    seasonType: str
+    seasonType: SeasonType
     week: int
     gameId: int
     homeTeam: str
@@ -459,10 +512,18 @@ PlayStatsResponseList = List[PlayStatsResponse]
 RankingsResponseList = List[RankingsResponse]
 RosterPlayerList = List[RosterPlayer]
 CoachList = List[Coach]
+LinesList = List[BettingGame]
 MetricsPregameWpResponseList = List[MetricsPregameWpResponse]
 
 
-VALID_SEASONS = range(2001, 2025)
+VALID_SEASONS = range(2001, 2026)
 VALID_WEEKS = range(1, 16)
-VALID_SEASON_TYPES = ['regular', 'postseason']
+VALID_SEASON_TYPES = [
+    "regular",
+    "postseason",
+    "both",
+    "allstar",
+    "spring_regular",
+    "spring_postseason",
+]
 VALID_DIVISIONS = ['fbs', 'fcs', 'ii', 'iii']

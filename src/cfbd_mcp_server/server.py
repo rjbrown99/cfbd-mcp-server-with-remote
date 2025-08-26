@@ -17,13 +17,13 @@ from .cfbd_schema import (
     # Request parameter types
     getGames, getTeamRecords, getGamesTeams, getPlays, getDrives,
     getPlayStats, getRankings, getMetricsPregameWp, getAdvancedBoxScore, getRoster,
-    getCoaches,
+    getCoaches, getLines,
     
     # Response types
     GamesResponse, TeamRecordResponse, GamesTeamsResponse, PlaysResponse,
     DrivesResponse, PlayStatsResponse, RankingsResponse,
-    MetricsPregameWpResponse, AdvancedBoxScoreResponse, RosterPlayer,
-    CoachesResponse,
+    MetricsPregameWpResponse, AdvancedBoxScoreResponse, RosterResponse,
+    CoachesResponse, BettingGame,
     
     # Constants
     VALID_SEASONS, VALID_WEEKS, VALID_SEASON_TYPES, VALID_DIVISIONS
@@ -105,6 +105,12 @@ async def handle_list_resources() -> list[types.Resource]:
             mimeType="text/plain"
         ),
         types.Resource(
+            uri="schema://lines",
+            name="Lines endpoint",
+            description="Schema for the /lines endpoint",
+            mimeType="text/plain"
+        ),
+        types.Resource(
             uri="schema://metrics/wp/pregame",
             name="Metrics/wp/pregame endpoint",
             description="Schema for the pregame win probability endpoint",
@@ -162,7 +168,7 @@ async def handle_read_resource(uri: str) -> str:
         "schema://roster": {
             "endpoint": "/roster",
             "parameters": getRoster.__annotations__,
-            "response": RosterPlayer.__annotations__,
+            "response": RosterResponse.__annotations__,
             "description": "Get team roster information for specified parameters"
         },
         "schema://coaches": {
@@ -170,6 +176,12 @@ async def handle_read_resource(uri: str) -> str:
             "parameters": getCoaches.__annotations__,
             "response": CoachesResponse.__annotations__,
             "description": "Get coaches information for specified parameters"
+        },
+        "schema://lines": {
+            "endpoint": "/lines",
+            "parameters": getLines.__annotations__,
+            "response": BettingGame.__annotations__,
+            "description": "Get betting data lines for specified parameters"
         },
         "schema://metrics/wp/pregame": {
             "endpoint": "/metrics/wp/pregame",
@@ -447,7 +459,7 @@ async def handle_list_tools() -> list[types.Tool]:
             Example valid queries:
             - year=2023, team="Alabama"
             - year=2023, week=1
-            - year=2023, conference="SEC
+            - year=2023, conference="SEC"
             """,
             inputSchema=create_tool_schema(getGamesTeams)
         ),
@@ -513,7 +525,7 @@ async def handle_list_tools() -> list[types.Tool]:
         types.Tool(
             name="get-coaches",
             description=base_description + """Get college football coach and coaching staff names, teams, and work history.
-            Optional: firstname, lastname, team, year, minyear, maxyear
+            Optional: firstName, lastName, team, year, minYear, maxYear
             At least one parameter is required
             Example valid queries:
             - firstname="james", lastname="franklin"
@@ -522,6 +534,22 @@ async def handle_list_tools() -> list[types.Tool]:
             - team="Alabama", year=2023
             """,
             inputSchema=create_tool_schema(getCoaches)
+        ),
+        types.Tool(
+            name="get-lines",
+            description=base_description + """Get college football historical betting data and lines.
+            Required: year OR gameId
+            Optional: seasonType, week, team, home, away, conference, provider
+            At least one parameter is required
+            Example valid queries:
+            - year=2023
+            - gameId=401403910
+            - year=2023, seasonType="regular"
+            - team="Alabama", year=2023
+            - year=2025, home="Penn State", away="Ohio State"
+            - year=2025, conference="SEC"
+            """,
+            inputSchema=create_tool_schema(getLines)
         ),
         types.Tool(
             name="get-pregame-win-probability",
@@ -566,6 +594,7 @@ async def handle_call_tool(
         "get-rankings": getRankings,
         "get-roster": getRoster,
         "get-coaches": getCoaches,
+        "get-lines": getLines,
         "get-pregame-win-probability": getMetricsPregameWp,
         "get-advanced-box-score": getAdvancedBoxScore
     }
@@ -592,6 +621,7 @@ async def handle_call_tool(
         "get-rankings": "/rankings",
         "get-roster": "/roster",
         "get-coaches": "/coaches",
+        "get-lines": "/lines",
         "get-pregame-win-probability": "/metrics/wp/pregame",
         "get-advanced-box-score": "/game/box/advanced"
     }
