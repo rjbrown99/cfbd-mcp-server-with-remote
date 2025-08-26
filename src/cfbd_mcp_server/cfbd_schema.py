@@ -38,6 +38,7 @@ class Team(TypedDict):
     stats: List[TeamStat]
 
 class RosterPlayer(TypedDict):
+    """Team rosters"""
     id: str
     firstName: str
     lastName: str
@@ -45,7 +46,7 @@ class RosterPlayer(TypedDict):
     height: Optional[int] # nullable in API
     weight: Optional[int]  # nullable in API
     jersey: Optional[int]  # nullable in API
-    year: int
+    year: Optional[int] # deprecated in API
     position: Optional[str]  # nullable in API
     homeCity: Optional[str]  # nullable in API
     homeState: Optional[str]  # nullable in API
@@ -54,6 +55,26 @@ class RosterPlayer(TypedDict):
     homeLongitude: Optional[float]  # nullable in API
     homeCountyFIPS: Optional[str]  # nullable in API
     recruitIds: Optional[str]  # nullable in API
+
+class CoachSeason(TypedDict):
+    school: str
+    year: int
+    games: int
+    wins: int
+    losses: int
+    ties: int
+    preseasonRank: Optional[int]
+    postseasonRank: Optional[int]
+    srs: Optional[float]
+    spOverall: Optional[float]
+    spDefense: Optional[float]
+
+class Coach(TypedDict):
+    """Coach"""
+    firstName: str
+    lastName: str
+    hireDate: Optional[str]
+    seasons: List[CoachSeason]
 
 class QuarterBreakdown(TypedDict):
     """Breakdown of statistics by quarter and total"""
@@ -398,6 +419,20 @@ class RosterResponse(TypedDict): # /roster response
     homeCountyFIPS: Optional[str]
     recruitIds: Optional[List[str]]
 
+class getCoaches(TypedDict): # /coaches endpoint
+    firstName: Optional[str]
+    lastName: Optional[str]
+    team: Optional[str]
+    year: Optional[int]
+    minYear: Optional[int]
+    maxYear: Optional[int]
+
+class CoachesResponse(TypedDict): # /coaches response
+    firstName: str
+    lastName: str
+    hireDate: str
+    seasons: List[CoachSeason]
+
 class getMetricsPregameWp(TypedDict): # /metrics/wp/pregame endpoint
     year: Optional[int]
     week: Optional[int]
@@ -423,6 +458,7 @@ DrivesResponseList = List[DrivesResponse]
 PlayStatsResponseList = List[PlayStatsResponse]
 RankingsResponseList = List[RankingsResponse]
 RosterPlayerList = List[RosterPlayer]
+CoachList = List[Coach]
 MetricsPregameWpResponseList = List[MetricsPregameWpResponse]
 
 

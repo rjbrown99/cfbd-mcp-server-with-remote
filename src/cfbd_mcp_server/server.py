@@ -17,11 +17,13 @@ from .cfbd_schema import (
     # Request parameter types
     getGames, getTeamRecords, getGamesTeams, getPlays, getDrives,
     getPlayStats, getRankings, getMetricsPregameWp, getAdvancedBoxScore, getRoster,
+    getCoaches,
     
     # Response types
     GamesResponse, TeamRecordResponse, GamesTeamsResponse, PlaysResponse,
     DrivesResponse, PlayStatsResponse, RankingsResponse,
     MetricsPregameWpResponse, AdvancedBoxScoreResponse, RosterPlayer,
+    CoachesResponse,
     
     # Constants
     VALID_SEASONS, VALID_WEEKS, VALID_SEASON_TYPES, VALID_DIVISIONS
@@ -97,6 +99,12 @@ async def handle_list_resources() -> list[types.Resource]:
             mimeType="text/plain"
         ),
         types.Resource(
+            uri="schema://coaches",
+            name="Coaches endpoint",
+            description="Schema for the /coaches endpoint",
+            mimeType="text/plain"
+        ),
+        types.Resource(
             uri="schema://metrics/wp/pregame",
             name="Metrics/wp/pregame endpoint",
             description="Schema for the pregame win probability endpoint",
@@ -156,6 +164,12 @@ async def handle_read_resource(uri: str) -> str:
             "parameters": getRoster.__annotations__,
             "response": RosterPlayer.__annotations__,
             "description": "Get team roster information for specified parameters"
+        },
+        "schema://coaches": {
+            "endpoint": "/coaches",
+            "parameters": getCoaches.__annotations__,
+            "response": CoachesResponse.__annotations__,
+            "description": "Get coaches information for specified parameters"
         },
         "schema://metrics/wp/pregame": {
             "endpoint": "/metrics/wp/pregame",
@@ -488,13 +502,26 @@ async def handle_list_tools() -> list[types.Tool]:
         types.Tool(
             name="get-roster",
             description=base_description + """Get college football roster data and player names and numbers.
-            Required: team
-            Optional: year
+            Optional: team, year
+            At least one parameter is required
             Example valid queries:
             - team="Alabama"
             - team="Alabama", year=2023
             """,
             inputSchema=create_tool_schema(getRoster)
+        ),
+        types.Tool(
+            name="get-coaches",
+            description=base_description + """Get college football coach and coaching staff names, teams, and work history.
+            Optional: firstname, lastname, team, year, minyear, maxyear
+            At least one parameter is required
+            Example valid queries:
+            - firstname="james", lastname="franklin"
+            - team="Alabama", minyear=2021, maxyear=2025
+            - team="Alabama"
+            - team="Alabama", year=2023
+            """,
+            inputSchema=create_tool_schema(getCoaches)
         ),
         types.Tool(
             name="get-pregame-win-probability",
@@ -538,6 +565,7 @@ async def handle_call_tool(
         "get-play-stats": getPlayStats,
         "get-rankings": getRankings,
         "get-roster": getRoster,
+        "get-coaches": getCoaches,
         "get-pregame-win-probability": getMetricsPregameWp,
         "get-advanced-box-score": getAdvancedBoxScore
     }
@@ -563,6 +591,7 @@ async def handle_call_tool(
         "get-play-stats": "/play/stats",
         "get-rankings": "/rankings",
         "get-roster": "/roster",
+        "get-coaches": "/coaches",
         "get-pregame-win-probability": "/metrics/wp/pregame",
         "get-advanced-box-score": "/game/box/advanced"
     }
