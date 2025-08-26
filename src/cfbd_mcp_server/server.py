@@ -7,6 +7,11 @@ from importlib.metadata import metadata
 from dotenv import load_dotenv
 from typing import Any, TypedDict, Type, cast, Union
 import httpx
+import hashlib
+from urllib.parse import urlparse
+from datetime import datetime, timezone
+import redis.asyncio as redis
+import json
 
 from mcp.server.models import InitializationOptions
 import mcp.types as types
@@ -38,6 +43,7 @@ load_dotenv()
 server = Server("cfbd")
 API_KEY = os.getenv("CFB_API_KEY")
 API_BASE_URL = 'https://apinext.collegefootballdata.com/'
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/1")
 
 # --- Debug level (0=off, 1=basic, 2=verbose) ---
 DEBUG_LEVEL = int(os.getenv("DEBUG_LEVEL", "1"))
@@ -62,6 +68,48 @@ def _trim(s: str, limit: int = 4000) -> str:
 
 if not API_KEY:
     raise ValueError("CFB_API_KEY must be set in .env file")
+
+# -----------------------------
+# Redis cache (by full CFBD URL)
+# -----------------------------
+_redis: redis.Redis | None = None
+
+async def _get_redis() -> redis.Redis | None:
+    """Create/return a shared async Redis client. Returns None if unavailable."""
+    global _redis
+    if _redis is not None:
+        return _redis
+    try:
+        _redis = await redis.from_url(REDIS_URL, decode_responses=True)  # store UTF-8 strings
+        await _redis.ping()
+        _dbg(1, "Redis connected: %s", REDIS_URL)
+        return _redis
+    except Exception as e:
+        _dbg(1, "Redis unavailable (%s) — continuing without cache", e)
+        return None
+
+# TTLs by endpoint path (no trailing slash)
+TTL_BY_ENDPOINT = {
+    "/lines":   5 * 60,                 # 5 minutes
+    "/coaches": 60 * 60 * 24 * 30,      # 30 days
+    # add more here as needed:
+    # "/games":   60 * 60,              # 1 hour
+    # "/records": 60 * 60 * 24,         # 1 day
+}
+
+def _endpoint_path_from_url(full_url: str) -> str:
+    """Normalize to a path without trailing slash, e.g. '/lines'."""
+    p = urlparse(full_url).path
+    return p[:-1] if p.endswith("/") and p != "/" else p
+
+def _ttl_for_endpoint_path(path: str) -> int:
+    path = _endpoint_path_from_url(path)
+    return TTL_BY_ENDPOINT.get(path, 60 * 60)  # default 1 hour if not listed
+
+def _url_cache_key(full_url: str) -> str:
+    """Hash the full URL to keep keys short and safe."""
+    h = hashlib.sha256(full_url.encode("utf-8")).hexdigest()
+    return f"cfbd:url:{h}"
 
 # Set up API client session
 async def get_api_client() -> httpx.AsyncClient:
@@ -693,24 +741,61 @@ async def handle_call_tool(
             start = time.monotonic()
             method = "GET"
             url = endpoint_map[name]
+            endpoint_path = endpoint_map[name]
 
             # log request
-            _dbg(1, "→ %s %s params=%s", method, url, arguments if DEBUG_LEVEL >= 2 else "{...}")
+            _dbg(1, "→ %s %s params=%s", method, endpoint_path, validated_params if DEBUG_LEVEL >= 2 else "{...}")
             if DEBUG_LEVEL >= 2:
                 _dbg(2, "Request headers: %s", dict(client.headers))
                 if method == "POST":
                     _dbg(2, "Request body: %s", arguments)
 
-            response = await client.get(url, params=arguments)
+            # Build canonical request to get exact full URL (sorted/encoded)
+            req = client.build_request(method, endpoint_path, params=validated_params)
+            full_url = str(req.url)
+
+            # -----------------------------
+            # Cache lookup by FULL URL (hashed)
+            # -----------------------------
+            r = await _get_redis()
+            cache_key = _url_cache_key(full_url)
+            if r is not None:
+                try:
+                    cached_text = await r.get(cache_key)
+                    if cached_text:
+                        _dbg(1, "CFBD cache HIT: %s", cache_key)
+                        data = json.loads(cached_text)
+                        elapsed_ms = (time.monotonic() - start) * 1000
+                        _dbg(1, "← %s %s %d in %.1fms (cache)", method, full_url, 200, elapsed_ms)
+                        return [types.TextContent(type="text", text=str(data))]
+                except Exception as e:
+                    _dbg(1, "CFBD cache get error: %s", e)
+
+            # Cache miss → call API
+            _dbg(1, "→ CFBD %s %s", method, full_url)
+            response = await client.send(req)
             elapsed_ms = (time.monotonic() - start) * 1000
 
             # log response
-            _dbg(1, "← %s %s %d in %.1fms", method, url, response.status_code, elapsed_ms)
+            _dbg(1, "← %s %s %d in %.1fms", method, full_url, response.status_code, elapsed_ms)
             if DEBUG_LEVEL >= 2:
                 _dbg(2, "Response headers: %s", dict(response.headers))
 
             response.raise_for_status()
-            data = response.json()
+            raw_text = response.text
+            data = json.loads(raw_text)
+
+            # -----------------------------
+            # Cache store by FULL URL (hashed)
+            # -----------------------------
+            if r is not None:
+                try:
+                    ttl = _ttl_for_endpoint_path(full_url)
+                    await r.set(cache_key, raw_text, ex=ttl)
+                    endpoint_path = _endpoint_path_from_url(full_url)
+                    _dbg(1, "CFBD cache SET: %s (%s, ttl=%ds)", cache_key, endpoint_path, ttl)
+                except Exception as e:
+                    _dbg(1, "CFBD cache set error: %s", e)
 
             # For POSTs at level 1, also log request/response body
             if DEBUG_LEVEL >= 1 and method == "POST":

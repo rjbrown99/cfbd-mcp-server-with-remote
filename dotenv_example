@@ -4,3 +4,9 @@ CFB_API_KEY=YOUR_API_KEY_FOR_THE_CFDB_WEB_API_GOES_HERE
 # This is a generic bearer token for a single client
 # Generate one with python3 -c 'import secrets; print("sk-" + secrets.token_urlsafe(32))'
 ANTHROPIC_BEARER_TOKEN=TOKEN_GOES_HERE
+
+# REDIS server URL
+# REDIS_URL=redis://localhost:6379/0
+
+# Debug level 1 or 2, where 1 is "normal" logs and 2 is verbose
+# DEBUG_LEVEL=1
