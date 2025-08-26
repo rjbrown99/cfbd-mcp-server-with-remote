@@ -1,6 +1,8 @@
 import asyncio
 import os
 import sys
+import time
+import logging
 from importlib.metadata import metadata
 from dotenv import load_dotenv
 from typing import Any, TypedDict, Type, cast, Union
@@ -37,19 +39,79 @@ server = Server("cfbd")
 API_KEY = os.getenv("CFB_API_KEY")
 API_BASE_URL = 'https://apinext.collegefootballdata.com/'
 
+# --- Debug level (0=off, 1=basic, 2=verbose) ---
+DEBUG_LEVEL = int(os.getenv("DEBUG_LEVEL", "1"))
+logger = logging.getLogger("anthropic-server")
+
+# Gate httpx/httpcore verbosity by our DEBUG_LEVEL
+if DEBUG_LEVEL >= 2:
+    logging.getLogger("httpx").setLevel(logging.DEBUG)
+    logging.getLogger("httpcore").setLevel(logging.DEBUG)
+else:
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+    logging.getLogger("httpcore").setLevel(logging.WARNING)
+
+logging.basicConfig(level=logging.DEBUG if DEBUG_LEVEL > 0 else logging.INFO)
+
+def _dbg(level: int, msg: str, *args):
+    if DEBUG_LEVEL >= level:
+        logger.debug(msg, *args)
+
+def _trim(s: str, limit: int = 4000) -> str:
+    return s if len(s) <= limit else s[:limit] + f"... <trimmed {len(s)-limit} chars>"
+
 if not API_KEY:
     raise ValueError("CFB_API_KEY must be set in .env file")
 
 # Set up API client session
 async def get_api_client() -> httpx.AsyncClient:
     """Create an API client with authentication headers."""
+    # Pretty-print JSON bodies if possible
+    def _pp_json(s: str) -> str:
+        try:
+            import json
+            return json.dumps(json.loads(s), indent=2, ensure_ascii=False)
+        except Exception:
+            return s
+
+    async def _log_req(request: httpx.Request) -> None:
+        if DEBUG_LEVEL <= 0:
+            return
+        _dbg(1, "→ CFBD %s %s", request.method, str(request.url))
+        # Level 1: show request body for non-GET (no headers)
+        if request.method in {"POST", "PUT", "PATCH"} and request.content and DEBUG_LEVEL >= 1:
+            try:
+                _dbg(1, "CFBD req body: %s", _pp_json(request.content.decode("utf-8", "replace")))
+            except Exception:
+                _dbg(1, "CFBD req body (raw): %r", request.content)
+        # Level 2: also show headers
+        if DEBUG_LEVEL >= 2:
+            _dbg(2, "CFBD req headers: %s", dict(request.headers))
+
+    async def _log_resp(response: httpx.Response) -> None:
+        if DEBUG_LEVEL <= 0:
+            return
+        req = response.request
+        # Ensure the response body is fully read before accessing .text/.json in the hook
+        await response.aread()
+        _dbg(1, "← CFBD %s %s %d", req.method, str(req.url), response.status_code)
+        # Level 1: always show response body (no headers)
+        _dbg(1, "CFBD reply: %s", _pp_json(response.text))
+        # Level 2: also show headers
+        if DEBUG_LEVEL >= 2:
+            _dbg(2, "CFBD resp headers: %s", dict(response.headers))
+
     return httpx.AsyncClient(
         base_url=API_BASE_URL,
         headers={
             "Authorization": f"Bearer {API_KEY}",
             "Accept": "application/json"
         },
-        timeout=30.0
+        timeout=30.0,
+        event_hooks={
+            "request": [_log_req],
+            "response": [_log_resp],
+        },
     )
 
 @server.list_resources()
@@ -628,9 +690,33 @@ async def handle_call_tool(
    
     async with await get_api_client() as client:
         try:
-            response = await client.get(endpoint_map[name], params=arguments)
+            start = time.monotonic()
+            method = "GET"
+            url = endpoint_map[name]
+
+            # log request
+            _dbg(1, "→ %s %s params=%s", method, url, arguments if DEBUG_LEVEL >= 2 else "{...}")
+            if DEBUG_LEVEL >= 2:
+                _dbg(2, "Request headers: %s", dict(client.headers))
+                if method == "POST":
+                    _dbg(2, "Request body: %s", arguments)
+
+            response = await client.get(url, params=arguments)
+            elapsed_ms = (time.monotonic() - start) * 1000
+
+            # log response
+            _dbg(1, "← %s %s %d in %.1fms", method, url, response.status_code, elapsed_ms)
+            if DEBUG_LEVEL >= 2:
+                _dbg(2, "Response headers: %s", dict(response.headers))
+
             response.raise_for_status()
             data = response.json()
+
+            # For POSTs at level 1, also log request/response body
+            if DEBUG_LEVEL >= 1 and method == "POST":
+                _dbg(1, "POST body: %s", arguments)
+                _dbg(1, "POST reply: %s", _trim(str(data)))
+
             return [types.TextContent(
                 type="text",
                 text=str(data)
