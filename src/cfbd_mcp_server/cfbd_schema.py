@@ -395,7 +395,7 @@ class DrivesResponse(TypedDict): # /drives response
     end_offense_score: int
     end_defense_score: int
 
-class getPlayStats(TypedDict): # /play/stats endpoint
+class getPlaysStats(TypedDict): # /plays/stats endpoint
     year: Optional[int]
     week: Optional[int]
     team: Optional[str]
@@ -405,7 +405,7 @@ class getPlayStats(TypedDict): # /play/stats endpoint
     season_type: Optional[SeasonType]
     conference: Optional[str]
 
-class PlayStatsResponse(TypedDict): # /play/stats response
+class PlaysStatsResponse(TypedDict): # /plays/stats response
     gameId: int
     season: int
     week: int
@@ -508,7 +508,7 @@ TeamRecordResponseList = List[TeamRecordResponse]
 GamesTeamsResponseList = List[GamesTeamsResponse]
 PlaysResponseList = List[PlaysResponse]
 DrivesResponseList = List[DrivesResponse]
-PlayStatsResponseList = List[PlayStatsResponse]
+PlaysStatsResponseList = List[PlaysStatsResponse]
 RankingsResponseList = List[RankingsResponse]
 RosterPlayerList = List[RosterPlayer]
 CoachList = List[Coach]
