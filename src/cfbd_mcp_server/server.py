@@ -598,7 +598,7 @@ async def handle_list_tools() -> list[types.Tool]:
             inputSchema=create_tool_schema(getDrives)
         ),
         types.Tool(
-            name="get-play-stats",
+            name="get-plays-stats",
             description=base_description + """Get college football play statistic data.
             Optional: year, week, team, game_id, athlete_id, stat_type_id, season_type, conference
             At least one parameter is required
@@ -700,7 +700,7 @@ async def handle_call_tool(
         "get-games-teams": getGamesTeams,
         "get-plays": getPlays,
         "get-drives": getDrives,
-        "get-play-stats": getPlaysStats,
+        "get-plays-stats": getPlaysStats,
         "get-rankings": getRankings,
         "get-roster": getRoster,
         "get-coaches": getCoaches,
@@ -727,7 +727,7 @@ async def handle_call_tool(
         "get-games-teams": "/games/teams",
         "get-plays": "/plays",
         "get-drives": "/drives",
-        "get-play-stats": "/plays/stats",
+        "get-plays-stats": "/plays/stats",
         "get-rankings": "/rankings",
         "get-roster": "/roster",
         "get-coaches": "/coaches",
